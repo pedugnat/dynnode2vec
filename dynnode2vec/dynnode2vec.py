@@ -1,11 +1,13 @@
 """Blabla. """
 # pylint: disable=invalid-name
 
-from typing import List, Optional
+from typing import Any, List, Optional
 
+from itertools import starmap
 from multiprocessing import Pool
 
 import networkx as nx
+import pandas as pd
 from gensim.models import Word2Vec
 from stellargraph import StellarGraph
 from stellargraph.data import BiasedRandomWalk
@@ -176,7 +178,7 @@ class DynNode2Vec:
             with Pool(self.parallel_processes) as p:
                 return p.starmap(self.generate_updated_walks, zip(graphs[1:], graphs))
 
-        return map(self.generate_updated_walks, zip(graphs[1:], graphs))
+        return starmap(self.generate_updated_walks, zip(graphs[1:], graphs))
 
     @staticmethod
     def _update_embeddings(time_walks, model, embeddings):
@@ -202,7 +204,7 @@ class DynNode2Vec:
 
         return embeddings
 
-    def compute_embeddings(self, graphs: List[nx.Graph]):
+    def compute_embeddings(self, graphs: List[nx.Graph]) -> Any:
         """
         Compute dynamic embeddings on a list of graphs.
         """

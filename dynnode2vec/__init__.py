@@ -1,4 +1,3 @@
-# type: ignore[attr-defined]
 """dynnode2vec is a package to embed dynamic graphs"""
 
 import sys
