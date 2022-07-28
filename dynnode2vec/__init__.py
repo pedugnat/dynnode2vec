@@ -4,6 +4,9 @@
 import sys
 from importlib import metadata as importlib_metadata
 
+from .dynnode2vec import DynNode2Vec
+from .utils import generate_dynamic_graphs
+
 
 def get_version() -> str:
     try:
