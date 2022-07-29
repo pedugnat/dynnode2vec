@@ -36,7 +36,7 @@ class DynNode2Vec:
         window: int = 10,
         seed: Optional[int] = 0,
         parallel_processes: int = 4,
-        use_delta_nodes: bool = True,
+        plain_node2vec: bool = False,
     ):
         # pylint: disable=too-many-instance-attributes
         """Instantiate the DynNode2Vec object.
@@ -47,8 +47,9 @@ class DynNode2Vec:
         :param n_walks_per_node: Number of walks per node (default: 10)
         :param embedding_size: Embedding dimensions (default: 128)
         :param window: Size of the Word2Vec window around each node (default: 10)
-        :param seed: Seed for the random number generators
+        :param seed: Seed for the random number generators (default: 0)
         :param parallel_processes: Number of workers for parallel execution (default: 4)
+        :param plain_node2vec: Whether to apply simple sequential node2vec (default: False)
         """
         # argument validation
         assert isinstance(p, float) and p > 0, "p should be a strictly positive float"
@@ -71,7 +72,7 @@ class DynNode2Vec:
         assert (
             isinstance(parallel_processes, int) and 0 < parallel_processes < 128
         ), "parallel_processes should be a strictly positive integer"
-        assert isinstance(use_delta_nodes, bool), "use_delta_nodes should be a boolean"
+        assert isinstance(plain_node2vec, bool), "plain_node2vec should be a boolean"
 
         self.p = p
         self.q = q
@@ -81,7 +82,7 @@ class DynNode2Vec:
         self.window = window
         self.seed = seed
         self.parallel_processes = parallel_processes
-        self.use_delta_nodes = use_delta_nodes  # if False, equivalent to plain node2vec
+        self.plain_node2vec = plain_node2vec
 
     def _initialize_embeddings(self, graphs):
         """
@@ -113,7 +114,7 @@ class DynNode2Vec:
         return model, [embedding]
 
     @staticmethod
-    def find_evolving_samples(current_graph, previous_graph):
+    def find_evolving_nodes(current_graph, previous_graph):
         """
         Find for which nodes we will have to run new walks.
 
@@ -151,10 +152,14 @@ class DynNode2Vec:
         """
         Compute delta nodes and generate new walks for them.
         """
-        if self.use_delta_nodes:
-            delta_nodes = self.find_evolving_samples(current_graph, previous_graph)
-        else:
+        if self.plain_node2vec:
+            # if we stick to node2vec implementation, we sample walks
+            # for all nodes at each time step
             delta_nodes = current_graph.nodes()
+        else:
+            # if we use dynnode2vec, we sample walks only for nodes
+            # that changed compared to the previous time step
+            delta_nodes = self.find_evolving_nodes(current_graph, previous_graph)
 
         G = StellarGraph.from_networkx(current_graph)
 
@@ -180,8 +185,7 @@ class DynNode2Vec:
 
         return starmap(self.generate_updated_walks, zip(graphs[1:], graphs))
 
-    @staticmethod
-    def _update_embeddings(time_walks, model, embeddings):
+    def _update_embeddings(self, time_walks, model, embeddings):
         """
         Update sequentially the embeddings based on the first iteration.
 
@@ -191,6 +195,11 @@ class DynNode2Vec:
         for walks in time_walks:
             # this is the only sequential step that can not be parallelized
             # since Z_t depends on Z_t-1...Z_0
+
+            if self.plain_node2vec:
+                # if we stick to node2vec, we reinitialize Word2vec
+                # weights at each time step
+                model.init_weights()
 
             # update word2vec model with new nodes (ie new vocabulary)
             model.build_vocab(walks, update=True)
