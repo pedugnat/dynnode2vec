@@ -98,7 +98,7 @@ check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true
 ignore_missing_imports = true
-implicit_reexport = false
+implicit_reexport = true
 no_implicit_optional = true
 show_column_numbers = true
 show_error_codes = true
@@ -112,12 +112,14 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 # Directories that are not visited by pytest collector:
 norecursedirs =["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
 doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
+filterwarnings = [
+    "ignore::DeprecationWarning:"
+    ]
 
 # Extra options:
 addopts = [
