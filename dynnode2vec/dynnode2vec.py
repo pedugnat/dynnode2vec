@@ -3,14 +3,16 @@
 
 from typing import Any, List, Optional
 
+from collections import namedtuple
 from itertools import starmap
 from multiprocessing import Pool
 
 import networkx as nx
-import pandas as pd
 from gensim.models import Word2Vec
 from stellargraph import StellarGraph
 from stellargraph.data import BiasedRandomWalk
+
+Embedding = namedtuple("Embedding", ["vectors", "mapping"])
 
 
 class DynNode2Vec:
@@ -106,11 +108,9 @@ class DynNode2Vec:
             workers=self.parallel_processes,
         )
 
-        df_embeddings = pd.DataFrame(model.wv.vectors, index=model.wv.index_to_key)
+        embedding = Embedding(model.wv.vectors, model.wv.index_to_key.copy())
 
-        embeddings = [df_embeddings]
-
-        return model, embeddings
+        return model, [embedding]
 
     @staticmethod
     def find_evolving_samples(current_graph, previous_graph):
@@ -198,9 +198,9 @@ class DynNode2Vec:
             # update embedding by retraining the models with additional walks
             model.train(walks, total_examples=model.corpus_count, epochs=model.epochs)
 
-            df_embeddings = pd.DataFrame(model.wv.vectors, index=model.wv.index_to_key)
+            embedding = Embedding(model.wv.vectors, model.wv.index_to_key.copy())
 
-            embeddings.append(df_embeddings)
+            embeddings.append(embedding)
 
         return embeddings
 

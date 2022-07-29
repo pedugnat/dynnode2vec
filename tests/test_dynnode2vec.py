@@ -1,5 +1,6 @@
+from collections import namedtuple
+
 import gensim
-import pandas as pd
 import pytest
 
 import dynnode2vec
@@ -23,7 +24,7 @@ def test_initialize_embeddings(graphs, dynnode2vec_fixture):
     init_model, init_embeddings = dynnode2vec_fixture._initialize_embeddings(graphs)
 
     assert isinstance(init_model, gensim.models.Word2Vec)
-    assert isinstance(init_embeddings[0], pd.DataFrame)
+    assert isinstance(init_embeddings[0], dynnode2vec.Embedding)
 
 
 def test_find_evolving_samples(graphs, dynnode2vec_fixture):
@@ -48,3 +49,4 @@ def test_compute_embeddings(graphs, dynnode2vec_fixture):
     embeddings = dynnode2vec_fixture.compute_embeddings(graphs)
 
     assert isinstance(embeddings, list)
+    assert all(isinstance(emb, dynnode2vec.Embedding) for emb in embeddings)
