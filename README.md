@@ -12,11 +12,13 @@
 
 </div>
 
-<h3>
+<h4>
 
-**`dynnode2vec` is a package to embed dynamic graphs. It is the python implementation of [S. Mahdavi, S. Khoshraftar, A. An: dynnode2vec: Scalable Dynamic Network Embedding. IEEE BigData 2018](http://www.cs.yorku.ca/~aan/research/paper/dynnode2vec.pdf)**
+`dynnode2vec` is a package to embed dynamic graphs. 
 
-</h3>
+It is the python implementation of [S. Mahdavi, S. Khoshraftar, A. An: dynnode2vec: Scalable Dynamic Network Embedding. IEEE BigData 2018](http://www.cs.yorku.ca/~aan/research/paper/dynnode2vec.pdf)
+
+</h4>
 
 ## Installation
 

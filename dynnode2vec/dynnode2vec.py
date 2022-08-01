@@ -1,4 +1,3 @@
-"""Blabla. """
 # pylint: disable=invalid-name
 
 from typing import Any, List, Optional

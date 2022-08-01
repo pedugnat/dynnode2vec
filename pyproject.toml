@@ -31,11 +31,11 @@ classifiers = [  #! Update me
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.9.0"
 numpy = "^1.23.1"
 networkx = "^2.8.5"
 gensim = "^4.2.0"
-black = "22.3.0"
+stellargraph = "^1.2.1"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"
