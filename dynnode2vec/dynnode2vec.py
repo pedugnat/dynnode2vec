@@ -197,14 +197,25 @@ class DynNode2Vec:
 
             if self.plain_node2vec:
                 # if we stick to plain node2vec, we reinitialize word2vec
-                # weights at each time step
-                model.init_weights()
+                # model at each time step
+                model = Word2Vec(
+                    sentences=walks,
+                    vector_size=self.embedding_size,
+                    window=self.window,
+                    min_count=0,
+                    sg=1,
+                    seed=self.seed,
+                    workers=self.parallel_processes,
+                )
 
-            # update word2vec model with new nodes (ie new vocabulary)
-            model.build_vocab(walks, update=True)
+            else:
+                # update word2vec model with new nodes (ie new vocabulary)
+                model.build_vocab(walks, update=True)
 
-            # update embedding by retraining the models with additional walks
-            model.train(walks, total_examples=model.corpus_count, epochs=model.epochs)
+                # update embedding by retraining the models with additional walks
+                model.train(
+                    walks, total_examples=model.corpus_count, epochs=model.epochs
+                )
 
             embedding = Embedding(model.wv.vectors, model.wv.index_to_key.copy())
 

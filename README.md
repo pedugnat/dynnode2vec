@@ -28,41 +28,22 @@ pip install -U dynnode2vec
 ## Usage
 
 ```python
+import pickle
 
-import networkx as ns
-import random
-import pandas as pd
-from dynnode2vec import DynNode2Vec
+from dynnode2vec.dynnode2vec import DynNode2Vec
+from dynnode2vec.utils import generate_dynamic_graphs
 
-# Create a random graph for time step 0, ie G_0
-graph = nx.fast_gnp_random_graph(n=100, p=0.05)
+# Create random graphs
+graphs = generate_dynamic_graphs(
+  n_base_nodes=100, n_steps=50, base_density=0.05
+)
 
-graphs = [graph]
-
-# modify the graph randomly at each time step to create G_1, ..., G_T
-for _ in range(5):    
-    # remove 2 nodes
-    random_nodes_to_remove = random.sample(list(graph.nodes()), k=2)
-    [graph.remove_node(n) for n in random_nodes_to_remove]
-
-    # add 5 nodes
-    [graph.add_node(max(graph.nodes) + 1) for _ in range(5)]
-
-    # add 10 new edges
-    random_edges_to_add = zip(
-        random.sample(list(graph.nodes()), k=10), 
-        random.sample(list(graph.nodes()), k=10),
-    )
-    [graph.add_edge(e1, e2) for e1, e2 in random_edges_to_add]
-    
-    graphs.append(graph)
-    
 # Instantiate dynnode2vec object
 dynnode2vec = DynNode2Vec(
     p=1., 
     q=1., 
     walk_length=10, 
-    n_walks_per_node=10, 
+    n_walks_per_node=20, 
     embedding_size=64
 )
 
@@ -70,7 +51,8 @@ dynnode2vec = DynNode2Vec(
 embeddings = dynnode2vec.compute_embeddings(graphs)
 
 # Save embeddings to disk
-embeddings.to_json("example_embeddings.json")
+with open('example_embeddings.pkl', 'wb') as f:
+    pickle.dump(embeddings, f)
 ```
 
 ## Parameters
@@ -88,9 +70,9 @@ embeddings.to_json("example_embeddings.json")
   - `graphs`: list of nx.Graph (ordered by time)
 
 ## TO DO 
-- [] get rid of Stellar Graph dependency
-- [] code examples of synthetic and real-life uses
-- [] remove pandas use in embeddings 
+- [x] remove pandas use in embeddings formatting
+- [ ] code examples of synthetic and real-life uses
+- [ ] get rid of Stellar Graph dependency
 
 
 ## Releases
