@@ -30,7 +30,7 @@ def test_initialize_embeddings(graphs, dynnode2vec_fixture):
 def test_find_evolving_samples(graphs, dynnode2vec_fixture):
     current, previous = graphs[1], graphs[0]
 
-    delta_nodes = dynnode2vec_fixture.find_evolving_samples(current, previous)
+    delta_nodes = dynnode2vec_fixture.find_evolving_nodes(current, previous)
 
     assert isinstance(delta_nodes, set)
     assert all(n in current.nodes() for n in delta_nodes)
