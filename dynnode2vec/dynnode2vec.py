@@ -197,7 +197,7 @@ class DynNode2Vec:
             # since Z_t depends on Z_t-1...Z_0
 
             if self.plain_node2vec:
-                # if we stick to node2vec, we reinitialize Word2vec
+                # if we stick to plain node2vec, we reinitialize word2vec
                 # weights at each time step
                 model.init_weights()
 
