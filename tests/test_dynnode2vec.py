@@ -20,6 +20,20 @@ def dynnode2vec_fixture():
     )
 
 
+@pytest.fixture
+def dynnode2vec_parallel_fixture():
+    return dynnode2vec.DynNode2Vec(
+        n_walks_per_node=5, walk_length=5, parallel_processes=2
+    )
+
+
+@pytest.fixture
+def plain_node2vec_parallel_fixture():
+    return dynnode2vec.DynNode2Vec(
+        n_walks_per_node=5, walk_length=5, plain_node2vec=True
+    )
+
+
 def test_initialize_embeddings(graphs, dynnode2vec_fixture):
     init_model, init_embeddings = dynnode2vec_fixture._initialize_embeddings(graphs)
 
@@ -45,8 +59,33 @@ def test_generate_updated_walks(graphs, dynnode2vec_fixture):
     assert all(node in current.nodes() for walk in updated_walks for node in walk)
 
 
+def test_node2vec_generate_updated_walks(graphs, plain_node2vec_parallel_fixture):
+    current, previous = graphs[1], graphs[0]
+
+    updated_walks = plain_node2vec_parallel_fixture.generate_updated_walks(
+        current, previous
+    )
+
+    assert isinstance(updated_walks, list)
+    assert all(node in current.nodes() for walk in updated_walks for node in walk)
+
+
 def test_compute_embeddings(graphs, dynnode2vec_fixture):
     embeddings = dynnode2vec_fixture.compute_embeddings(graphs)
+
+    assert isinstance(embeddings, list)
+    assert all(isinstance(emb, dynnode2vec.Embedding) for emb in embeddings)
+
+
+def test_parallel_compute_embeddings(graphs, dynnode2vec_parallel_fixture):
+    embeddings = dynnode2vec_parallel_fixture.compute_embeddings(graphs)
+
+    assert isinstance(embeddings, list)
+    assert all(isinstance(emb, dynnode2vec.Embedding) for emb in embeddings)
+
+
+def test_node2vec_compute_embeddings(graphs, plain_node2vec_parallel_fixture):
+    embeddings = plain_node2vec_parallel_fixture.compute_embeddings(graphs)
 
     assert isinstance(embeddings, list)
     assert all(isinstance(emb, dynnode2vec.Embedding) for emb in embeddings)
