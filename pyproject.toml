@@ -36,6 +36,7 @@ numpy = "^1.23.1"
 networkx = "^2.8.5"
 gensim = "^4.2.0"
 stellargraph = "^1.2.1"
+chardet = "^5.0.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"
