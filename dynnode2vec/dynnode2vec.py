@@ -16,7 +16,7 @@ Embedding = namedtuple("Embedding", ["vectors", "mapping"])
 
 class DynNode2Vec:
     """
-    dynnode2vec is an algorithm that embeds dynamic graphs.
+    dynnode2vec is an algorithm to embed dynamic graphs.
 
     It is heavily inspired from node2vec but uses previous
     states' embeddings with updates in order to get stable
@@ -38,7 +38,7 @@ class DynNode2Vec:
         plain_node2vec: bool = False,
     ):
         # pylint: disable=too-many-instance-attributes
-        """Instantiate the DynNode2Vec object.
+        """Instantiate a DynNode2Vec object.
 
         :param p: Return hyper parameter (default: 1.0)
         :param q: Inout parameter (default: 1.0)
@@ -95,7 +95,6 @@ class DynNode2Vec:
             n=self.n_walks_per_node,
             p=self.p,
             q=self.q,
-            seed=self.seed,
         )
 
         model = Word2Vec(
@@ -139,7 +138,7 @@ class DynNode2Vec:
         modified_nodes = {
             n
             for n in current_graph.nodes()
-            if any(edge in delta_edges for edge in current_graph.edges(n))
+            if any(delta_edge in current_graph.edges(n) for delta_edge in delta_edges)
         }
 
         # delta nodes are either new nodes or nodes which edges changed
@@ -164,12 +163,11 @@ class DynNode2Vec:
 
         # run walks for updated nodes only
         updated_walks = BiasedRandomWalk(G).run(
-            nodes=delta_nodes,
+            nodes=list(delta_nodes),
             length=self.walk_length,
             n=self.n_walks_per_node,
             p=self.p,
             q=self.q,
-            seed=self.seed,
         )
 
         return updated_walks
