@@ -83,6 +83,9 @@ class DynNode2Vec:
         self.parallel_processes = parallel_processes
         self.plain_node2vec = plain_node2vec
 
+        # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp
+        self.gensim_workers = max(self.parallel_processes - 1, 12)
+
     def _initialize_embeddings(self, graphs):
         """
         Compute normal node2vec embedding at timestep 0.
@@ -104,7 +107,7 @@ class DynNode2Vec:
             min_count=0,
             sg=1,
             seed=self.seed,
-            workers=self.parallel_processes,
+            workers=self.gensim_workers,
         )
 
         embedding = Embedding(model.wv.vectors.copy(), model.wv.index_to_key.copy())
@@ -119,6 +122,10 @@ class DynNode2Vec:
         We compute the output of equation (1) of the paper, i.e.
         ∆V_t = V_add ∪ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
         """
+        # find V_add ie nodes that were added
+        added_nodes = {
+            n for n in current_graph.nodes() if n not in previous_graph.nodes()
+        }
 
         # find edges that were either added or removed between current and previous
         added_edges = {
@@ -128,11 +135,6 @@ class DynNode2Vec:
             n for n in previous_graph.edges() if n not in current_graph.edges()
         }
         delta_edges = added_edges | removed_edges
-
-        # find V_add ie nodes that were added
-        added_nodes = {
-            n for n in current_graph.nodes() if n not in previous_graph.nodes()
-        }
 
         nodes_modified_edge = set(chain(*delta_edges)).intersection(
             current_graph.nodes()
@@ -200,7 +202,7 @@ class DynNode2Vec:
                     min_count=0,
                     sg=1,
                     seed=self.seed,
-                    workers=self.parallel_processes,
+                    workers=self.gensim_workers,
                 )
 
             else:
