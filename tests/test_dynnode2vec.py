@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 import gensim
+import networkx as nx
 import pytest
 
 import dynnode2vec
@@ -48,6 +49,19 @@ def test_find_evolving_samples(graphs, dynnode2vec_fixture):
 
     assert isinstance(delta_nodes, set)
     assert all(n in current.nodes() for n in delta_nodes)
+
+
+def test_find_evolving_samples2(dynnode2vec_fixture):
+    previous = nx.complete_graph(n=4)
+
+    current = previous.copy()
+    current.add_node(5)
+    current.add_edge(0, 5)
+    current.remove_edge(1, 3)
+
+    delta_nodes = dynnode2vec_fixture.find_evolving_nodes(current, previous)
+
+    assert delta_nodes == {0, 1, 3, 5}
 
 
 def test_generate_updated_walks(graphs, dynnode2vec_fixture):

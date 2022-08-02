@@ -3,7 +3,7 @@
 from typing import Any, List, Optional
 
 from collections import namedtuple
-from itertools import starmap
+from itertools import chain, starmap
 from multiprocessing import Pool
 
 import networkx as nx
@@ -107,7 +107,7 @@ class DynNode2Vec:
             workers=self.parallel_processes,
         )
 
-        embedding = Embedding(model.wv.vectors, model.wv.index_to_key.copy())
+        embedding = Embedding(model.wv.vectors.copy(), model.wv.index_to_key.copy())
 
         return model, [embedding]
 
@@ -134,15 +134,12 @@ class DynNode2Vec:
             n for n in current_graph.nodes() if n not in previous_graph.nodes()
         }
 
-        # find nodes which edges were modified
-        modified_nodes = {
-            n
-            for n in current_graph.nodes()
-            if any(delta_edge in current_graph.edges(n) for delta_edge in delta_edges)
-        }
+        nodes_modified_edge = set(chain(*delta_edges)).intersection(
+            current_graph.nodes()
+        )
 
         # delta nodes are either new nodes or nodes which edges changed
-        delta_nodes = added_nodes | modified_nodes
+        delta_nodes = added_nodes | nodes_modified_edge
 
         return delta_nodes
 
@@ -215,7 +212,7 @@ class DynNode2Vec:
                     walks, total_examples=model.corpus_count, epochs=model.epochs
                 )
 
-            embedding = Embedding(model.wv.vectors, model.wv.index_to_key.copy())
+            embedding = Embedding(model.wv.vectors.copy(), model.wv.index_to_key.copy())
 
             embeddings.append(embedding)
 
