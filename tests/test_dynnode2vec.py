@@ -42,16 +42,16 @@ def test_initialize_embeddings(graphs, dynnode2vec_fixture):
     assert isinstance(init_embeddings[0], dynnode2vec.Embedding)
 
 
-def test_find_evolving_samples(graphs, dynnode2vec_fixture):
+def test_get_delta_nodes(graphs, dynnode2vec_fixture):
     current, previous = graphs[1], graphs[0]
 
-    delta_nodes = dynnode2vec_fixture.find_evolving_nodes(current, previous)
+    delta_nodes = dynnode2vec_fixture.get_delta_nodes(current, previous)
 
     assert isinstance(delta_nodes, set)
-    assert all(n in current.nodes() for n in delta_nodes)
+    assert delta_nodes.issubset(current.nodes)
 
 
-def test_find_evolving_samples2(dynnode2vec_fixture):
+def test_get_delta_nodes2(dynnode2vec_fixture):
     previous = nx.complete_graph(n=4)
 
     current = previous.copy()
@@ -59,7 +59,7 @@ def test_find_evolving_samples2(dynnode2vec_fixture):
     current.add_edge(0, 5)
     current.remove_edge(1, 3)
 
-    delta_nodes = dynnode2vec_fixture.find_evolving_nodes(current, previous)
+    delta_nodes = dynnode2vec_fixture.get_delta_nodes(current, previous)
 
     assert delta_nodes == {0, 1, 3, 5}
 

@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name
 
-from typing import Any, List, Optional
+from typing import Any, Iterable, List, Optional, Set, Tuple
 
 from collections import namedtuple
 from itertools import chain, starmap
@@ -12,6 +12,7 @@ from stellargraph import StellarGraph
 from stellargraph.data import BiasedRandomWalk
 
 Embedding = namedtuple("Embedding", ["vectors", "mapping"])
+RandomWalks = List[List[Any]]
 
 
 class DynNode2Vec:
@@ -86,7 +87,9 @@ class DynNode2Vec:
         # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp
         self.gensim_workers = max(self.parallel_processes - 1, 12)
 
-    def _initialize_embeddings(self, graphs):
+    def _initialize_embeddings(
+        self, graphs: List[nx.Graph]
+    ) -> Tuple[Word2Vec, List[Embedding]]:
         """
         Compute normal node2vec embedding at timestep 0.
         """
@@ -115,37 +118,37 @@ class DynNode2Vec:
         return model, [embedding]
 
     @staticmethod
-    def find_evolving_nodes(current_graph, previous_graph):
+    def get_delta_nodes(current_graph: nx.Graph, previous_graph: nx.Graph) -> Set[Any]:
         """
-        Find for which nodes we will have to run new walks.
+        Find nodes in the current graph which have been modified, i.e. they have been added,
+        or at least one of their edge have been updated.
+        This is the subset of nodes for which we will generate new random walks.
 
         We compute the output of equation (1) of the paper, i.e.
         ∆V_t = V_add ∪ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
+
+        We make the assumption about V_add that we only care about nodes that are connected
+        to at least one other node, i.e. nodes that have at least one edge.
+        This assumption yields that V_add ⊆ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)},
+        which we can use to avoid computing V_add.
         """
-        # find V_add ie nodes that were added
-        added_nodes = {
-            n for n in current_graph.nodes() if n not in previous_graph.nodes()
-        }
-
         # find edges that were either added or removed between current and previous
-        added_edges = {
-            n for n in current_graph.edges() if n not in previous_graph.edges()
-        }
-        removed_edges = {
-            n for n in previous_graph.edges() if n not in current_graph.edges()
-        }
-        delta_edges = added_edges | removed_edges
+        delta_edges = current_graph.edges ^ previous_graph.edges
 
-        nodes_modified_edge = set(chain(*delta_edges)).intersection(
-            current_graph.nodes()
-        )
+        # find nodes in the current graph which edges have been updated
+        # = {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
+        nodes_with_modified_edges = set(chain(*delta_edges))
 
-        # delta nodes are either new nodes or nodes which edges changed
-        delta_nodes = added_nodes | nodes_modified_edge
+        # Delta nodes are new nodes (V_add) and current nodes which edges have changed.
+        # Since we only care about nodes that have at least one edge, we can
+        # assume that V_add ⊆ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
+        delta_nodes = current_graph.nodes & nodes_with_modified_edges
 
         return delta_nodes
 
-    def generate_updated_walks(self, current_graph, previous_graph):
+    def generate_updated_walks(
+        self, current_graph: nx.Graph, previous_graph: nx.Graph
+    ) -> RandomWalks:
         """
         Compute delta nodes and generate new walks for them.
         """
@@ -156,12 +159,12 @@ class DynNode2Vec:
         else:
             # if we use dynnode2vec, we sample walks only for nodes
             # that changed compared to the previous time step
-            delta_nodes = self.find_evolving_nodes(current_graph, previous_graph)
+            delta_nodes = self.get_delta_nodes(current_graph, previous_graph)
 
         G = StellarGraph.from_networkx(current_graph)
 
         # run walks for updated nodes only
-        updated_walks = BiasedRandomWalk(G).run(
+        updated_walks: RandomWalks = BiasedRandomWalk(G).run(
             nodes=list(delta_nodes),
             length=self.walk_length,
             n=self.n_walks_per_node,
@@ -171,7 +174,7 @@ class DynNode2Vec:
 
         return updated_walks
 
-    def _simulate_walks(self, graphs):
+    def _simulate_walks(self, graphs: List[nx.Graph]) -> Iterable[RandomWalks]:
         """
         Parallelize the generation of walks on the time steps graphs.
         """
@@ -181,7 +184,12 @@ class DynNode2Vec:
 
         return starmap(self.generate_updated_walks, zip(graphs[1:], graphs))
 
-    def _update_embeddings(self, time_walks, model, embeddings):
+    def _update_embeddings(
+        self,
+        embeddings: List[Embedding],
+        time_walks: Iterable[RandomWalks],
+        model: Word2Vec,
+    ) -> None:
         """
         Update sequentially the embeddings based on the first iteration.
 
@@ -189,7 +197,7 @@ class DynNode2Vec:
         and update the Word2Vec model with new vocabulary and new walks.
         """
         for walks in time_walks:
-            # this is the only sequential step that can not be parallelized
+            # this is the only sequential step that cannot be parallelized
             # since Z_t depends on Z_t-1...Z_0
 
             if self.plain_node2vec:
@@ -206,10 +214,10 @@ class DynNode2Vec:
                 )
 
             else:
-                # update word2vec model with new nodes (ie new vocabulary)
+                # update word2vec model with new nodes (i.e. new vocabulary)
                 model.build_vocab(walks, update=True)
 
-                # update embedding by retraining the models with additional walks
+                # update embedding by retraining the model with additional walks
                 model.train(
                     walks, total_examples=model.corpus_count, epochs=model.epochs
                 )
@@ -218,14 +226,12 @@ class DynNode2Vec:
 
             embeddings.append(embedding)
 
-        return embeddings
-
-    def compute_embeddings(self, graphs: List[nx.Graph]) -> Any:
+    def compute_embeddings(self, graphs: List[nx.Graph]) -> List[Embedding]:
         """
         Compute dynamic embeddings on a list of graphs.
         """
         model, embeddings = self._initialize_embeddings(graphs)
         time_walks = self._simulate_walks(graphs)
-        embeddings = self._update_embeddings(time_walks, model, embeddings)
+        self._update_embeddings(embeddings, time_walks, model)
 
         return embeddings
