@@ -9,7 +9,7 @@ def sample_nodes(graph: nx.Graph, k: int) -> List[int]:
     """
     Sample nodes randomly from a graph.
     """
-    return random.sample(list(graph.nodes), k=k)
+    return random.sample(graph.nodes, k=k)
 
 
 def generate_dynamic_graphs(
