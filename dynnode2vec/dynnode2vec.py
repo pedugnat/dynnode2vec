@@ -120,26 +120,32 @@ class DynNode2Vec:
     @staticmethod
     def get_delta_nodes(current_graph: nx.Graph, previous_graph: nx.Graph) -> Set[Any]:
         """
-        Find nodes which have been modified, i.e. they have been added, deleted,
+        Find nodes in the current graph which have been modified, i.e. they have been added,
         or at least one of their edge have been updated.
         This is the subset of nodes for which we will generate new random walks.
 
         We compute the output of equation (1) of the paper, i.e.
         ∆V_t = V_add ∪ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
-        """
-        # find nodes that were added
-        # = V_add
-        added_nodes = current_graph.nodes - previous_graph.nodes
 
+        We make the assumption about V_add that we only care about nodes that are connected
+        to at least one other node, i.e. nodes that have at least one edge.
+        This assumption yields that V_add ⊆ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)},
+        which we can use to avoid computing V_add.
+        """
         # find edges that were either added or removed between current and previous
         delta_edges = current_graph.edges ^ previous_graph.edges
 
-        # find nodes which edges have been updated
+        # find nodes in the current graph which edges have been updated
         # = {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
-        nodes_modified_edge = current_graph.nodes & chain(*delta_edges)
+        nodes_with_modified_edges = set(chain(*delta_edges))
+        current_nodes_with_modified_edge = (
+            current_graph.nodes & nodes_with_modified_edges
+        )
 
-        # delta nodes are either new nodes or nodes which edges changed
-        delta_nodes: Set[Any] = added_nodes | nodes_modified_edge
+        # Delta nodes are new nodes (V_add) and current nodes which edges have changed.
+        # Since we only care about nodes that have at least one edge, we can
+        # assume that V_add ⊆ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
+        delta_nodes = current_nodes_with_modified_edge
 
         return delta_nodes
 
