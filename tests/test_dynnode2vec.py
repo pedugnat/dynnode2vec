@@ -42,7 +42,7 @@ def test_initialize_embeddings(graphs, dynnode2vec_fixture):
     assert isinstance(init_embeddings[0], dynnode2vec.Embedding)
 
 
-def test_find_evolving_samples(graphs, dynnode2vec_fixture):
+def test_get_delta_nodes(graphs, dynnode2vec_fixture):
     current, previous = graphs[1], graphs[0]
 
     delta_nodes = dynnode2vec_fixture.get_delta_nodes(current, previous)
@@ -51,7 +51,7 @@ def test_find_evolving_samples(graphs, dynnode2vec_fixture):
     assert delta_nodes.issubset(current.nodes)
 
 
-def test_find_evolving_samples2(dynnode2vec_fixture):
+def test_get_delta_nodes2(dynnode2vec_fixture):
     previous = nx.complete_graph(n=4)
 
     current = previous.copy()
