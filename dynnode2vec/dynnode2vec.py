@@ -171,7 +171,7 @@ class DynNode2Vec:
 
         return updated_walks
 
-    def _simulate_walks(self, graphs: nx.Graph) -> Iterable[RandomWalks]:
+    def _simulate_walks(self, graphs: List[nx.Graph]) -> Iterable[RandomWalks]:
         """
         Parallelize the generation of walks on the time steps graphs.
         """
