@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name
 
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Set, Tuple
 
 from collections import namedtuple
 from itertools import chain, starmap
@@ -86,7 +86,7 @@ class DynNode2Vec:
         # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp
         self.gensim_workers = max(self.parallel_processes - 1, 12)
 
-    def _initialize_embeddings(self, graphs):
+    def _initialize_embeddings(self, graphs: List[nx.Graph]) -> Tuple[Word2Vec, List[Embedding]]:
         """
         Compute normal node2vec embedding at timestep 0.
         """
@@ -115,37 +115,34 @@ class DynNode2Vec:
         return model, [embedding]
 
     @staticmethod
-    def find_evolving_nodes(current_graph, previous_graph):
+    def get_delta_nodes(current_graph: nx.Graph, previous_graph: nx.Graph) -> Set[int]:
         """
-        Find for which nodes we will have to run new walks.
+        Find nodes which have been modified, i.e. they have been added, deleted,
+        or at least one of their edge have been updated.
+        This is the subset of nodes for which we will generate new random walks.
 
         We compute the output of equation (1) of the paper, i.e.
         ∆V_t = V_add ∪ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
         """
-        # find V_add ie nodes that were added
+        # find nodes that were added
+        # = V_add
         added_nodes = {
             n for n in current_graph.nodes() if n not in previous_graph.nodes()
         }
 
         # find edges that were either added or removed between current and previous
-        added_edges = {
-            n for n in current_graph.edges() if n not in previous_graph.edges()
-        }
-        removed_edges = {
-            n for n in previous_graph.edges() if n not in current_graph.edges()
-        }
-        delta_edges = added_edges | removed_edges
-
-        nodes_modified_edge = set(chain(*delta_edges)).intersection(
-            current_graph.nodes()
-        )
+        delta_edges = current_graph.edges ^ previous_graph.edges
+        
+        # find nodes which edges have been updated
+        # = {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
+        nodes_modified_edge = current_graph.nodes & chain(*delta_edges)
 
         # delta nodes are either new nodes or nodes which edges changed
         delta_nodes = added_nodes | nodes_modified_edge
 
         return delta_nodes
 
-    def generate_updated_walks(self, current_graph, previous_graph):
+    def generate_updated_walks(self, current_graph: nx.Graph, previous_graph: nx.Graph):
         """
         Compute delta nodes and generate new walks for them.
         """
@@ -156,7 +153,7 @@ class DynNode2Vec:
         else:
             # if we use dynnode2vec, we sample walks only for nodes
             # that changed compared to the previous time step
-            delta_nodes = self.find_evolving_nodes(current_graph, previous_graph)
+            delta_nodes = self.get_delta_nodes(current_graph, previous_graph)
 
         G = StellarGraph.from_networkx(current_graph)
 
