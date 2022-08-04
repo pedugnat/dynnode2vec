@@ -48,7 +48,7 @@ def test_find_evolving_samples(graphs, dynnode2vec_fixture):
     delta_nodes = dynnode2vec_fixture.get_delta_nodes(current, previous)
 
     assert isinstance(delta_nodes, set)
-    assert delta_nodes <= current.nodes
+    assert delta_nodes.issubset(current.nodes)
 
 
 def test_find_evolving_samples2(dynnode2vec_fixture):
