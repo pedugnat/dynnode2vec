@@ -18,9 +18,7 @@ class BiasedRandomWalk:
 
     def map_int_ids_to_true_ids(self, walks: List[List[Any]]) -> None:
         # map back integers id to true node id
-        mapping = {
-            int_id: data["true_label"] for int_id, data in self.graph.nodes(data=True)
-        }
+        mapping = nx.get_node_attributes(self.graph, "true_label")
 
         # inplace replace walks of integer ids by true ids
         for i in range(len(walks)):
