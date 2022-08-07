@@ -11,7 +11,16 @@ RandomWalks = List[List[Any]]
 
 
 class BiasedRandomWalk:
+    """
+    Performs biased second order random walks (like those used in Node2Vec algorithm)
+    controlled by the values of two parameters p (return parameter) and q (in-out parameter).
+    """
+
     def __init__(self, graph: nx.Graph):
+        """Instantiate a BiasedRandomWalk object.
+
+        :param graph: graph to run walk on
+        """
         self.graph = nx.convert_node_labels_to_integers(
             graph, ordering="sorted", label_attribute="true_label"
         )
@@ -29,12 +38,12 @@ class BiasedRandomWalk:
         """
         Choose a random index in an array, based on weights.
 
-        This method is fastest than built-in numpy functions like
-        Inspired from https://stackoverflow.com/questions/24140114/fast-way-to-obtain-a-random-index-from-an-array-of-weights-in-python
+        This method is fastest than built-in numpy functions like `numpy.random.choice`
+        or `numpy.random.multinomial`.
+        See https://stackoverflow.com/questions/24140114/fast-way-to-obtain-a-random-index-from-an-array-of-weights-in-python
 
-        Example : for array [1, 4, 4], index 0 will be chosen with probabilty 1/9,
+        Example: for array [1, 4, 4], index 0 will be chosen with probabilty 1/9,
         index 1 and index 2 will be chosen with probability 4/9.
-
         """
         probs = np.cumsum(weights)
         total = probs[-1]
@@ -105,12 +114,13 @@ class BiasedRandomWalk:
         weighted: bool = False,
         seed: Union[int, None] = None,
     ) -> RandomWalks:
-        # seed random generator
+        """
+        Perform a number of random walks for all the nodes of the graph. The
+        behavior of the random walk is mainly conditioned by two parameters p and q.
+        """
         rn = random.Random(seed)
 
-        # retrieve nodes
-        nodes = self.graph.nodes()
-
+        # weights are multiplied by inverse p and q
         ip, iq = 1.0 / p, 1.0 / q
 
         generate_walk = partial(
@@ -122,7 +132,9 @@ class BiasedRandomWalk:
             rn=rn,
         )
 
-        walks = [generate_walk(node) for node in nodes for _ in range(n_walks)]
+        walks = [
+            generate_walk(node) for node in self.graph.nodes() for _ in range(n_walks)
+        ]
 
         self.map_int_ids_to_true_ids(walks)
 
