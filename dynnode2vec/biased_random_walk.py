@@ -34,7 +34,7 @@ class BiasedRandomWalk:
             walks[i] = list(map(mapping.get, walks[i]))
 
     @staticmethod
-    def weighted_choice(rn: random.Random, weights: Any) -> Union[int, None]:
+    def weighted_choice(rn: random.Random, weights: Any) -> int:
         """
         Choose a random index in an array, based on weights.
 
@@ -47,9 +47,6 @@ class BiasedRandomWalk:
         """
         probs = np.cumsum(weights)
         total = probs[-1]
-        if total == 0:
-            # all weights are zero, so we do not choose anything
-            return None
 
         return bisect.bisect(probs, rn.random() * total)
 
@@ -94,8 +91,6 @@ class BiasedRandomWalk:
                 weights[~mask] *= iq
 
             choice = self.weighted_choice(rn, weights)
-            if choice is None:
-                break
 
             previous_node = current_node
             previous_node_neighbours = neighbours
