@@ -142,7 +142,7 @@ class DynNode2Vec:
         # Delta nodes are new nodes (V_add) and current nodes which edges have changed.
         # Since we only care about nodes that have at least one edge, we can
         # assume that V_add ⊆ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
-        delta_nodes = current_graph.nodes & nodes_with_modified_edges
+        delta_nodes: Set[Any] = current_graph.nodes & nodes_with_modified_edges
 
         return delta_nodes
 
@@ -230,6 +230,7 @@ class DynNode2Vec:
         """
         Compute dynamic embeddings on a list of graphs.
         """
+        # TO DO : check graph weights valid
         model, embeddings = self._initialize_embeddings(graphs)
         time_walks = self._simulate_walks(graphs)
         self._update_embeddings(embeddings, time_walks, model)
