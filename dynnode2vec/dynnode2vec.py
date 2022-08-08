@@ -1,5 +1,7 @@
+"""
+Define a DynNode2Vec class to run dynnode2vec algorithm over dynamic graphs.
+"""
 # pylint: disable=invalid-name
-
 from typing import Any, Iterable, List, Optional, Set, Tuple
 
 from collections import namedtuple
@@ -24,6 +26,8 @@ class DynNode2Vec:
     Source paper: http://www.cs.yorku.ca/~aan/research/paper/dynnode2vec.pdf
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(
         self,
         *,
@@ -37,7 +41,6 @@ class DynNode2Vec:
         parallel_processes: int = 4,
         plain_node2vec: bool = False,
     ):
-        # pylint: disable=too-many-instance-attributes
         """Instantiate a DynNode2Vec object.
 
         :param p: Return hyper parameter (default: 1.0)
@@ -83,7 +86,7 @@ class DynNode2Vec:
         self.parallel_processes = parallel_processes
         self.plain_node2vec = plain_node2vec
 
-        # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp
+        # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp  # pylint: disable=line-too-long
         self.gensim_workers = max(self.parallel_processes - 1, 12)
 
     def _initialize_embeddings(
@@ -160,11 +163,11 @@ class DynNode2Vec:
             # that changed compared to the previous time step
             delta_nodes = self.get_delta_nodes(current_graph, previous_graph)
 
-        BRW = BiasedRandomWalk(current_graph)
-        delta_nodes = BRW.convert_true_ids_to_int_ids(delta_nodes)
+        brw = BiasedRandomWalk(current_graph)
+        delta_nodes = brw.convert_true_ids_to_int_ids(delta_nodes)
 
         # run walks for updated nodes only
-        updated_walks = BRW.run(
+        updated_walks = brw.run(
             nodes=delta_nodes,
             walk_length=self.walk_length,
             n_walks=self.n_walks_per_node,

@@ -44,13 +44,18 @@ check-codestyle:
 	poetry run isort --diff --check-only --settings-path pyproject.toml ./dynnode2vec ./tests
 	poetry run black --diff --check --config pyproject.toml ./dynnode2vec ./tests
 	poetry run darglint --verbosity 2 ./dynnode2vec ./tests
+	poetry run pylint ./dynnode2vec/ ./tests
+
+.PHONY: pylint
+pylint:
+	poetry run pylint ./dynnode2vec/ ./tests
 
 .PHONY: mypy
 mypy:
 	poetry run mypy --config-file pyproject.toml ./dynnode2vec ./tests
 
 .PHONY: lint
-lint: test check-codestyle mypy
+lint: check-codestyle mypy
 
 .PHONY: update-dev-deps
 update-dev-deps:
