@@ -31,9 +31,9 @@ def test_weighted_choice(graphs):
 
     assert all(choice in [0, 1, 2] for choice in choices)
 
-    assert 1 / 9 - eps < (choices.count(0) / n_try) < 1 / 9 + eps
-    assert 4 / 9 - eps < (choices.count(1) / n_try) < 4 / 9 + eps
-    assert 4 / 9 - eps < (choices.count(2) / n_try) < 4 / 9 + eps
+    assert choices.count(0) / n_try == pytest.approx(1 / 9, abs=eps)
+    assert choices.count(1) / n_try == pytest.approx(4 / 9, abs=eps)
+    assert choices.count(2) / n_try == pytest.approx(4 / 9, abs=eps)
 
 
 @pytest.mark.parametrize("ip", [0.5, 1.0])
