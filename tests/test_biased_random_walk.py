@@ -60,10 +60,20 @@ def test_generate_walk(graphs, ip, iq, weighted):
     assert all(n in BRW.graph.nodes() for n in walk)
 
 
-def test_run(graphs):
-    BRW = dynnode2vec.biased_random_walk.BiasedRandomWalk(graphs[0])
+@pytest.mark.parametrize("p", [0.5, 1.0])
+@pytest.mark.parametrize("q", [1.0, 2.0])
+@pytest.mark.parametrize("weighted", [True, False])
+def test_run(graphs, p, q, weighted):
+    G = graphs[0]
 
-    random_walks = BRW.run()
+    # add random weights to the graph for the weighted case
+    if weighted:
+        for _, _, w in G.edges(data=True):
+            w["weight"] = random.random()
+
+    BRW = dynnode2vec.biased_random_walk.BiasedRandomWalk(G)
+
+    random_walks = BRW.run(p=p, q=q, weighted=weighted)
 
     assert all(isinstance(walk, list) for walk in random_walks)
     assert all(n in BRW.graph.nodes() for walk in random_walks for n in walk)

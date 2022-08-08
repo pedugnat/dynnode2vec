@@ -2,6 +2,7 @@ from typing import Any, List, Union
 
 import bisect
 import random
+from ast import walk
 from functools import partial
 
 import networkx as nx
@@ -45,7 +46,7 @@ class BiasedRandomWalk:
         Example: for array [1, 4, 4], index 0 will be chosen with probabilty 1/9,
         index 1 and index 2 will be chosen with probability 4/9.
         """
-        probs = np.cumsum(weights)
+        probs: Any = np.cumsum(weights)
         total = probs[-1]
 
         return bisect.bisect(probs, rn.random() * total)
@@ -105,6 +106,36 @@ class BiasedRandomWalk:
 
         return walk
 
+    def _generate_walk_simple(
+        self,
+        node: int,
+        walk_length: int,
+        ip: float,
+        iq: float,
+        weighted: bool,
+        rn: random.Random,
+    ) -> List[int]:
+        """
+        Fast implementation for the scenario where:
+            - the graph is unweighted
+            - p=q=1
+        This boils down to DeepWalk algorithm setting (unweighted case)
+        """
+        assert ip == 1.0
+        assert iq == 1.0
+        assert weighted == False
+
+        walk = [node]
+
+        if self.graph.degree[node] == 0:
+            # the starting node has no neighbor, so we return
+            return walk
+
+        for _ in range(walk_length - 1):
+            node = rn.choice(list(self.graph.neighbors(node)))
+            walk.append(node)
+        return walk
+
     def run(
         self,
         n_walks: int = 10,
@@ -123,8 +154,13 @@ class BiasedRandomWalk:
         # weights are multiplied by inverse p and q
         ip, iq = 1.0 / p, 1.0 / q
 
+        if (ip == 1.0) & (iq == 1.0) & (not weighted):
+            walk_function = self._generate_walk_simple
+        else:
+            walk_function = self._generate_walk
+
         generate_walk = partial(
-            self._generate_walk,
+            walk_function,
             walk_length=walk_length,
             ip=ip,
             iq=iq,
@@ -136,7 +172,7 @@ class BiasedRandomWalk:
             generate_walk(node) for node in self.graph.nodes() for _ in range(n_walks)
         ]
 
-        # we map back the integer ids (used for speed) to the original node ids
+        # map back the integer ids (used for speed) to the original node ids
         self.map_int_ids_to_true_ids(walks)
 
         return walks
