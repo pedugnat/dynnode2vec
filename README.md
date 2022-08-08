@@ -72,7 +72,7 @@ with open('example_embeddings.pkl', 'wb') as f:
 ## TO DO 
 - [x] remove pandas use in embeddings formatting
 - [ ] code examples of synthetic and real-life uses
-- [ ] get rid of Stellar Graph dependency
+- [x] get rid of Stellar Graph dependency
 
 
 ## Releases
