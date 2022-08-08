@@ -3,6 +3,7 @@
 import sys
 from importlib import metadata as importlib_metadata
 
+from .biased_random_walk import BiasedRandomWalk, RandomWalks
 from .dynnode2vec import DynNode2Vec, Embedding
 from .utils import generate_dynamic_graphs
 

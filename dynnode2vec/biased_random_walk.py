@@ -16,7 +16,7 @@ class BiasedRandomWalk:
     controlled by the values of two parameters p (return parameter) and q (in-out parameter).
     """
 
-    def __init__(self, graph: nx.Graph):
+    def __init__(self, graph: nx.Graph) -> None:
         """Instantiate a BiasedRandomWalk object.
 
         :param graph: graph to run walk on
@@ -62,7 +62,6 @@ class BiasedRandomWalk:
         """
         Generate a number of random walks starting from a given node.
         """
-        # TO DO : try to numba this function
         # the walk starts at the root
         walk = [node]
 
@@ -89,6 +88,8 @@ class BiasedRandomWalk:
                 weights = np.ones(neighbours.shape)
 
             if (ip != 1.0) or (iq != 1.0):
+                # we update the weights according to return (p) and in-out (q)
+                # parameters
                 mask = neighbours == previous_node
                 weights[mask] *= ip
                 mask |= np.isin(neighbours, previous_node_neighbours)
@@ -135,6 +136,7 @@ class BiasedRandomWalk:
             generate_walk(node) for node in self.graph.nodes() for _ in range(n_walks)
         ]
 
+        # we map back the integer ids (used for speed) to the original node ids
         self.map_int_ids_to_true_ids(walks)
 
         return walks
