@@ -148,6 +148,7 @@ class BiasedRandomWalk:
     def run(
         self,
         nodes: List[int],
+        *,
         n_walks: int = 10,
         walk_length: int = 10,
         p: float = 1.0,
