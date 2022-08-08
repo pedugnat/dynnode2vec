@@ -55,7 +55,7 @@ mypy:
 	poetry run mypy --config-file pyproject.toml ./dynnode2vec ./tests
 
 .PHONY: lint
-lint: check-codestyle mypy pylint
+lint: check-codestyle mypy
 
 .PHONY: update-dev-deps
 update-dev-deps:
