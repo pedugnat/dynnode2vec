@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import bisect
 import random
@@ -25,8 +25,8 @@ class BiasedRandomWalk:
             graph, ordering="sorted", label_attribute="true_label"
         )
 
-        self.mapping = nx.get_node_attributes(self.graph, "true_label")
-        self.reverse_mapping = {
+        self.mapping: Dict[int, Any] = nx.get_node_attributes(self.graph, "true_label")
+        self.reverse_mapping: Dict[Any, int] = {
             true_label: int_id for int_id, true_label in self.mapping.items()
         }
 
@@ -35,13 +35,13 @@ class BiasedRandomWalk:
         Replace walks of integer ids with true ids inplace.
         """
         for i in range(len(walks)):
-            walks[i] = list(map(self.mapping.get, walks[i]))
+            walks[i] = [self.mapping[label] for label in walks[i]]
 
     def convert_true_ids_to_int_ids(self, nodes: Iterable[Any]) -> List[int]:
         """
         Convert list of node labels to list of int ids.
         """
-        return list(map(self.reverse_mapping.get, nodes))
+        return [self.reverse_mapping[label] for label in nodes]
 
     @staticmethod
     def weighted_choice(rn: random.Random, weights: Any) -> int:

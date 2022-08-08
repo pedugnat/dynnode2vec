@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 
 import dynnode2vec
-from dynnode2vec.biased_random_walk import RandomWalks
 
 
 @pytest.fixture

@@ -9,10 +9,9 @@ from multiprocessing import Pool
 import networkx as nx
 from gensim.models import Word2Vec
 
-from dynnode2vec.biased_random_walk import BiasedRandomWalk
+from dynnode2vec.biased_random_walk import BiasedRandomWalk, RandomWalks
 
 Embedding = namedtuple("Embedding", ["vectors", "mapping"])
-RandomWalks = List[List[Any]]
 
 
 class DynNode2Vec:
@@ -165,7 +164,7 @@ class DynNode2Vec:
         delta_nodes = BRW.convert_true_ids_to_int_ids(delta_nodes)
 
         # run walks for updated nodes only
-        updated_walks: RandomWalks = BRW.run(
+        updated_walks = BRW.run(
             nodes=delta_nodes,
             walk_length=self.walk_length,
             n_walks=self.n_walks_per_node,
