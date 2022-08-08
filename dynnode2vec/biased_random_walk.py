@@ -58,7 +58,10 @@ class BiasedRandomWalk:
         iq: float,
         weighted: bool,
         rn: random.Random,
-    ) -> List[int]:
+    ) -> Union[List[int], None]:
+        """
+        Generate a number of random walks starting from a given node.
+        """
         # TO DO : try to numba this function
         # the walk starts at the root
         walk = [node]
@@ -67,6 +70,10 @@ class BiasedRandomWalk:
         previous_node_neighbours: Any = []
 
         current_node = node
+
+        if self.graph.degree[node] == 0:
+            # the starting node has no neighbor, so we return
+            return None
 
         for _ in range(walk_length - 1):
             # select one of the neighbours using the
@@ -80,9 +87,6 @@ class BiasedRandomWalk:
             else:
                 neighbours = np.array(list(self.graph.neighbors(current_node)))
                 weights = np.ones(neighbours.shape)
-
-            if len(neighbours) == 0:
-                break
 
             if (ip != 1.0) or (iq != 1.0):
                 mask = neighbours == previous_node
