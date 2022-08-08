@@ -25,7 +25,7 @@ class BiasedRandomWalk:
             graph, ordering="sorted", label_attribute="true_label"
         )
 
-    def map_int_ids_to_true_ids(self, walks: List[List[Any]]) -> None:
+    def map_int_ids_to_true_ids(self, walks: RandomWalks) -> None:
         # map back integers id to true node id
         mapping = nx.get_node_attributes(self.graph, "true_label")
 
@@ -58,7 +58,7 @@ class BiasedRandomWalk:
         iq: float,
         weighted: bool,
         rn: random.Random,
-    ) -> Union[List[int], None]:
+    ) -> List[int]:
         """
         Generate a number of random walks starting from a given node.
         """
@@ -73,17 +73,17 @@ class BiasedRandomWalk:
 
         if self.graph.degree[node] == 0:
             # the starting node has no neighbor, so we return
-            return None
+            return walk
 
         for _ in range(walk_length - 1):
             # select one of the neighbours using the
             # appropriate transition probabilities
             if weighted:
-                raise NotImplementedError()
-                # TO DO : get neighbors and weights in networkx fashion
-                # neighbours, weights = self.graph.neighbor_arrays(
-                #    current_node, include_edge_weight=True, use_ilocs=True
-                # )
+                edges_data = self.graph.edges(current_node, data="weight")
+
+                # edges_data is a list of triplets (current_node, out_node, weight)
+                neighbours = np.array([e[1] for e in edges_data])
+                weights = np.array([e[2] for e in edges_data])
             else:
                 neighbours = np.array(list(self.graph.neighbors(current_node)))
                 weights = np.ones(neighbours.shape)
