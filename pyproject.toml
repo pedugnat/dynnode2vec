@@ -17,7 +17,7 @@ homepage = "https://github.com/pedugnat/dynnode2vec"
 keywords = []  #! Update me
 
 # Pypi classifiers: https://pypi.org/classifiers/
-classifiers = [  #! Update me
+classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
