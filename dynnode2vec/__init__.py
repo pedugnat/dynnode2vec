@@ -1,4 +1,6 @@
-"""dynnode2vec is a package to embed dynamic graphs"""
+"""
+dynnode2vec is a package to embed dynamic graphs.
+"""
 
 import sys
 from importlib import metadata as importlib_metadata
@@ -9,6 +11,7 @@ from .utils import generate_dynamic_graphs
 
 
 def get_version() -> str:
+    # pylint: disable=missing-function-docstring
     try:
         return importlib_metadata.version(__name__)
     except importlib_metadata.PackageNotFoundError:  # pragma: no cover

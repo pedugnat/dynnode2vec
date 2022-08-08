@@ -1,3 +1,7 @@
+"""
+Define a BiasedRandomWalk class to perform biased random walks over graphs.
+"""
+# pylint: disable=invalid-name
 from typing import Any, Dict, Iterable, List, Union
 
 import bisect
@@ -50,7 +54,7 @@ class BiasedRandomWalk:
 
         This method is fastest than built-in numpy functions like `numpy.random.choice`
         or `numpy.random.multinomial`.
-        See https://stackoverflow.com/questions/24140114/fast-way-to-obtain-a-random-index-from-an-array-of-weights-in-python
+        See https://stackoverflow.com/questions/24140114/fast-way-to-obtain-a-random-index-from-an-array-of-weights-in-python  # pylint: disable=line-too-long
 
         Example: for array [1, 4, 4], index 0 will be chosen with probabilty 1/9,
         index 1 and index 2 will be chosen with probability 4/9.
@@ -69,6 +73,7 @@ class BiasedRandomWalk:
         weighted: bool,
         rn: random.Random,
     ) -> List[int]:
+        # pylint: disable=too-many-arguments, too-many-locals
         """
         Generate a number of random walks starting from a given node.
         """
@@ -94,8 +99,7 @@ class BiasedRandomWalk:
                 weights = np.ones(neighbours.shape)
 
             if (ip != 1.0) or (iq != 1.0):
-                # we update the weights according to return (p) and in-out (q)
-                # parameters
+                # we update the weights according to return (p) and in-out (q) parameters
                 mask = neighbours == previous_node
                 weights[mask] *= ip
                 mask |= np.isin(neighbours, previous_node_neighbours)
@@ -120,6 +124,7 @@ class BiasedRandomWalk:
         weighted: bool,
         rn: random.Random,
     ) -> List[int]:
+        # pylint: disable=too-many-arguments
         """
         Fast implementation for the scenario where:
             - the graph is unweighted
@@ -128,7 +133,7 @@ class BiasedRandomWalk:
         """
         assert ip == 1.0
         assert iq == 1.0
-        assert weighted == False
+        assert not weighted
 
         walk = [node]
 

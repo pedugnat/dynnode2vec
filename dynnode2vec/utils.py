@@ -1,3 +1,6 @@
+"""
+Utility file to define miscellaneous functions.
+"""
 from typing import List
 
 import random
@@ -15,6 +18,9 @@ def sample_nodes(graph: nx.Graph, k: int) -> List[int]:
 def generate_dynamic_graphs(
     n_base_nodes: int = 100, n_steps: int = 10, base_density: float = 0.01
 ) -> List[nx.Graph]:
+    """
+    Generates a list of dynamic graphs, i.e. that depend on the previous graph.
+    """
     # Create a random graph
     graph = nx.fast_gnp_random_graph(n=n_base_nodes, p=base_density)
 
@@ -25,8 +31,8 @@ def generate_dynamic_graphs(
     change_size = 1 + n_base_nodes // 10
     for _ in range(n_steps - 1):
         # remove some nodes
-        for n in sample_nodes(graph, k=change_size):
-            graph.remove_node(n)
+        for node in sample_nodes(graph, k=change_size):
+            graph.remove_node(node)
 
         # add some more nodes
         node_idx = max(graph.nodes) + 1
