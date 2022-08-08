@@ -67,7 +67,7 @@ def test_run(graphs, p, q, weighted):
 
     # add random weights to the graph for the weighted case
     if weighted:
-        for _, _, w in G.edges(data=True):
+        for *_, w in G.edges(data=True):
             w["weight"] = random.random()
 
     BRW = dynnode2vec.biased_random_walk.BiasedRandomWalk(G)
