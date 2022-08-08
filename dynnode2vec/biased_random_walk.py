@@ -34,8 +34,8 @@ class BiasedRandomWalk:
         """
         Replace walks of integer ids with true ids inplace.
         """
-        for i in range(len(walks)):
-            walks[i] = [self.mapping[label] for label in walks[i]]
+        for i, walk in enumerate(walks):
+            walks[i] = [self.mapping[int_id] for int_id in walk]
 
     def convert_true_ids_to_int_ids(self, nodes: Iterable[Any]) -> List[int]:
         """
@@ -79,10 +79,6 @@ class BiasedRandomWalk:
         previous_node_neighbours: Any = []
 
         current_node = node
-
-        if self.graph.degree[node] == 0:
-            # the starting node has no neighbor, so we return
-            return walk
 
         for _ in range(walk_length - 1):
             # select one of the neighbours using the
@@ -136,13 +132,10 @@ class BiasedRandomWalk:
 
         walk = [node]
 
-        if self.graph.degree[node] == 0:
-            # the starting node has no neighbor, so we return
-            return walk
-
         for _ in range(walk_length - 1):
             node = rn.choice(list(self.graph.neighbors(node)))
             walk.append(node)
+
         return walk
 
     def run(
@@ -179,7 +172,13 @@ class BiasedRandomWalk:
             rn=rn,
         )
 
-        walks = [generate_walk(node) for node in nodes for _ in range(n_walks)]
+        walks = []
+        for node in nodes:
+            if self.graph.degree[node] == 0:
+                # the node has no neighbors, so the walk ends instantly
+                walks.extend([[node] for _ in range(n_walks)])
+            else:
+                walks.extend([generate_walk(node) for _ in range(n_walks)])
 
         # map back the integer ids (used for speed) to the original node ids
         self.map_int_ids_to_true_ids(walks)
