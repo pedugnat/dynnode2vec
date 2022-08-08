@@ -73,7 +73,7 @@ def test_run(graphs, p, q, weighted):
 
     BRW = dynnode2vec.biased_random_walk.BiasedRandomWalk(G)
 
-    random_walks = BRW.run(p=p, q=q, weighted=weighted)
+    random_walks = BRW.run(G.nodes(), p=p, q=q, weighted=weighted)
 
     assert all(isinstance(walk, list) for walk in random_walks)
     assert all(n in BRW.graph.nodes() for walk in random_walks for n in walk)

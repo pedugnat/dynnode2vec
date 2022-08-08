@@ -8,8 +8,8 @@ from multiprocessing import Pool
 
 import networkx as nx
 from gensim.models import Word2Vec
-from stellargraph import StellarGraph
-from stellargraph.data import BiasedRandomWalk
+
+from dynnode2vec.biased_random_walk import BiasedRandomWalk
 
 Embedding = namedtuple("Embedding", ["vectors", "mapping"])
 RandomWalks = List[List[Any]]
@@ -93,12 +93,12 @@ class DynNode2Vec:
         """
         Compute normal node2vec embedding at timestep 0.
         """
-        first_graph = StellarGraph.from_networkx(graphs[0])
+        first_graph = graphs[0]
 
         first_walks = BiasedRandomWalk(first_graph).run(
             nodes=first_graph.nodes(),
-            length=self.walk_length,
-            n=self.n_walks_per_node,
+            walk_length=self.walk_length,
+            n_walks=self.n_walks_per_node,
             p=self.p,
             q=self.q,
         )
@@ -161,13 +161,14 @@ class DynNode2Vec:
             # that changed compared to the previous time step
             delta_nodes = self.get_delta_nodes(current_graph, previous_graph)
 
-        G = StellarGraph.from_networkx(current_graph)
+        BRW = BiasedRandomWalk(current_graph)
+        delta_nodes = BRW.convert_true_ids_to_int_ids(delta_nodes)
 
         # run walks for updated nodes only
-        updated_walks: RandomWalks = BiasedRandomWalk(G).run(
-            nodes=list(delta_nodes),
-            length=self.walk_length,
-            n=self.n_walks_per_node,
+        updated_walks: RandomWalks = BRW.run(
+            nodes=delta_nodes,
+            walk_length=self.walk_length,
+            n_walks=self.n_walks_per_node,
             p=self.p,
             q=self.q,
         )

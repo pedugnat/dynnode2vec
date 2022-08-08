@@ -1,8 +1,7 @@
-from typing import Any, List, Union
+from typing import Any, Iterable, List, Union
 
 import bisect
 import random
-from ast import walk
 from functools import partial
 
 import networkx as nx
@@ -26,13 +25,23 @@ class BiasedRandomWalk:
             graph, ordering="sorted", label_attribute="true_label"
         )
 
-    def map_int_ids_to_true_ids(self, walks: RandomWalks) -> None:
-        # map back integers id to true node id
-        mapping = nx.get_node_attributes(self.graph, "true_label")
+        self.mapping = nx.get_node_attributes(self.graph, "true_label")
+        self.reverse_mapping = {
+            true_label: int_id for int_id, true_label in self.mapping.items()
+        }
 
-        # inplace replace walks of integer ids by true ids
+    def map_int_ids_to_true_ids(self, walks: RandomWalks) -> None:
+        """
+        Replace walks of integer ids with true ids inplace.
+        """
         for i in range(len(walks)):
-            walks[i] = list(map(mapping.get, walks[i]))
+            walks[i] = list(map(self.mapping.get, walks[i]))
+
+    def convert_true_ids_to_int_ids(self, nodes: Iterable[Any]) -> List[int]:
+        """
+        Convert list of node labels to list of int ids.
+        """
+        return list(map(self.reverse_mapping.get, nodes))
 
     @staticmethod
     def weighted_choice(rn: random.Random, weights: Any) -> int:
@@ -138,6 +147,7 @@ class BiasedRandomWalk:
 
     def run(
         self,
+        nodes: List[int],
         n_walks: int = 10,
         walk_length: int = 10,
         p: float = 1.0,
@@ -168,9 +178,7 @@ class BiasedRandomWalk:
             rn=rn,
         )
 
-        walks = [
-            generate_walk(node) for node in self.graph.nodes() for _ in range(n_walks)
-        ]
+        walks = [generate_walk(node) for node in nodes for _ in range(n_walks)]
 
         # map back the integer ids (used for speed) to the original node ids
         self.map_int_ids_to_true_ids(walks)
