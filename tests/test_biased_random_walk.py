@@ -55,7 +55,7 @@ def test_generate_walk(graphs, ip, iq, weighted):
 
     # add random weights to the graph for the weighted case
     if weighted:
-        add_weights(graph)
+        add_random_weights(graph)
 
     brw = dynnode2vec.biased_random_walk.BiasedRandomWalk(graph)
     rng = random.Random(0)
