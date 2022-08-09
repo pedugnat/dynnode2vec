@@ -10,22 +10,22 @@ import networkx as nx
 
 def sample_nodes(graph: nx.Graph, k: int) -> List[int]:
     """
-    Sample nodes randomly from a graph.
+    Samples nodes randomly from a graph.
     """
     return random.sample(graph.nodes, k=k)
 
 
-def generate_dynamic_graphs(
+def create_dynamic_graphs(
     n_base_nodes: int = 100, n_steps: int = 10, base_density: float = 0.01
 ) -> List[nx.Graph]:
     """
-    Generates a list of dynamic graphs, i.e. that depend on the previous graph.
+    Creates a list of dynamic graphs, i.e. that depend on the previous graph.
     """
     # Create a random graph
     graph = nx.fast_gnp_random_graph(n=n_base_nodes, p=base_density)
 
     # add one to each node to avoid the perfect case where true_ids match int_ids
-    graph = nx.relabel_nodes(graph, mapping={n: n + 1 for n in graph.nodes()})
+    graph = nx.relabel_nodes(graph, mapping={n: str(n) for n in graph.nodes()})
 
     # initialize graphs list with first graph
     graphs = [graph.copy()]
@@ -38,9 +38,9 @@ def generate_dynamic_graphs(
             graph.remove_node(node)
 
         # add some more nodes
-        node_idx = max(graph.nodes) + 1
+        node_idx = max(map(int, graph.nodes)) + 1
         for i in range(2 * change_size):
-            graph.add_node(node_idx + i)
+            graph.add_node(str(node_idx + i))
 
         # add some edges for the new nodes
         for edge in zip(

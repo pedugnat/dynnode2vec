@@ -12,7 +12,7 @@ import dynnode2vec
 
 @pytest.fixture(name="graphs")
 def fixture_graphs():
-    return dynnode2vec.utils.generate_dynamic_graphs(
+    return dynnode2vec.utils.create_dynamic_graphs(
         n_base_nodes=30, n_steps=5, base_density=0.02
     )
 

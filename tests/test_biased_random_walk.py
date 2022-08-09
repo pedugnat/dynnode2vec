@@ -12,9 +12,14 @@ import dynnode2vec
 
 @pytest.fixture(name="graphs")
 def fixture_graphs():
-    return dynnode2vec.utils.generate_dynamic_graphs(
+    return dynnode2vec.utils.create_dynamic_graphs(
         n_base_nodes=30, n_steps=5, base_density=0.02
     )
+
+
+def add_weights(graph):
+    for *_, data in graph.edges(data=True):
+        data["weight"] = random.random()
 
 
 def test_init(graphs):
@@ -46,12 +51,11 @@ def test_generate_walk(graphs, ip, iq, weighted):
     # pylint: disable=invalid-name
     # make sure that tested node has at least one neighbor
     graph = graphs[0]
-    graph.add_edge(0, 1, weight=0.5)
+    graph.add_edge("0", "1")
 
     # add random weights to the graph for the weighted case
     if weighted:
-        for _, _, data in graph.edges(data=True):
-            data["weight"] = random.random()
+        add_weights(graph)
 
     brw = dynnode2vec.biased_random_walk.BiasedRandomWalk(graph)
     rng = random.Random(0)
@@ -74,8 +78,7 @@ def test_run(graphs, p, q, weighted):
 
     # add random weights to the graph for the weighted case
     if weighted:
-        for *_, data in graph.edges(data=True):
-            data["weight"] = random.random()
+        add_weights(graph)
 
     brw = dynnode2vec.biased_random_walk.BiasedRandomWalk(graph)
 

@@ -26,7 +26,7 @@ class BiasedRandomWalk:
         :param graph: graph to run walk on
         """
         self.graph = nx.convert_node_labels_to_integers(
-            graph, ordering="sorted", label_attribute="true_label"
+            graph, ordering="default", label_attribute="true_label"
         )
 
         self.mapping: Dict[int, Any] = nx.get_node_attributes(self.graph, "true_label")
