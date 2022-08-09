@@ -15,7 +15,7 @@ def sample_nodes(graph: nx.Graph, k: int) -> List[int]:
     return random.sample(graph.nodes, k=k)
 
 
-def create_dynamic_graphs(
+def create_dynamic_graph(
     n_base_nodes: int = 100, n_steps: int = 10, base_density: float = 0.01
 ) -> List[nx.Graph]:
     """
