@@ -31,10 +31,10 @@ pip install -U dynnode2vec
 import pickle
 
 from dynnode2vec.dynnode2vec import DynNode2Vec
-from dynnode2vec.utils import generate_dynamic_graphs
+from dynnode2vec.utils import create_dynamic_graph
 
 # Create random graphs
-graphs = generate_dynamic_graphs(
+graphs = create_dynamic_graph(
   n_base_nodes=100, n_steps=50, base_density=0.05
 )
 
