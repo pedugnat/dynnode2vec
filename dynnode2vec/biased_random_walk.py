@@ -81,7 +81,7 @@ class BiasedRandomWalk:
         walk = [node]
 
         previous_node = None
-        previous_node_neighbours: list[Any] = []
+        previous_node_neighbours: Any = []
 
         current_node = node
 
