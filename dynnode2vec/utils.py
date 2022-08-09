@@ -19,7 +19,8 @@ def create_dynamic_graph(
     n_base_nodes: int = 100, n_steps: int = 10, base_density: float = 0.01
 ) -> List[nx.Graph]:
     """
-    Creates a list of dynamic graphs, i.e. that depend on the previous graph.
+    Creates a list of graphs representing the evolution of a dynamic graph,
+    i.e. graphs that each depend on the previous graph.
     """
     # Create a random graph
     graph = nx.fast_gnp_random_graph(n=n_base_nodes, p=base_density)
