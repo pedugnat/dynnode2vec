@@ -74,7 +74,7 @@ def test_generate_updated_walks(graphs, dynnode2vec_object):
     updated_walks = dynnode2vec_object.generate_updated_walks(current, previous)
 
     assert isinstance(updated_walks, list)
-    assert all(node in current.nodes() for walk in updated_walks for node in walk)
+    assert all(node in current.nodes for walk in updated_walks for node in walk)
 
 
 def test_node2vec_generate_updated_walks(graphs, node2vec_object):
@@ -83,7 +83,7 @@ def test_node2vec_generate_updated_walks(graphs, node2vec_object):
     updated_walks = node2vec_object.generate_updated_walks(current, previous)
 
     assert isinstance(updated_walks, list)
-    assert all(node in current.nodes() for walk in updated_walks for node in walk)
+    assert all(node in current.nodes for walk in updated_walks for node in walk)
 
 
 def test_compute_embeddings(graphs, dynnode2vec_object):

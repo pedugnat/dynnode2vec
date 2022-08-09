@@ -98,7 +98,7 @@ class DynNode2Vec:
         first_graph = graphs[0]
 
         first_walks = BiasedRandomWalk(first_graph).run(
-            nodes=first_graph.nodes(),
+            nodes=first_graph.nodes,
             walk_length=self.walk_length,
             n_walks=self.n_walks_per_node,
             p=self.p,
@@ -157,7 +157,7 @@ class DynNode2Vec:
         if self.plain_node2vec:
             # if we stick to node2vec implementation, we sample walks
             # for all nodes at each time step
-            delta_nodes = current_graph.nodes()
+            delta_nodes = current_graph.nodes
         else:
             # if we use dynnode2vec, we sample walks only for nodes
             # that changed compared to the previous time step
