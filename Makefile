@@ -6,6 +6,7 @@ PYTHONPATH := `pwd`
 #* Variables
 IMAGE := dynnode2vec
 VERSION := latest
+SRC_FOLDERS := ./dynnode2vec ./tests ./benchmarks
 
 #* Poetry
 .PHONY: poetry-download
@@ -30,8 +31,8 @@ pre-commit-install:
 #* Formatters
 .PHONY: codestyle
 codestyle:
-	poetry run isort --settings-path pyproject.toml ./dynnode2vec ./tests
-	poetry run black --config pyproject.toml ./dynnode2vec ./tests
+	poetry run isort --settings-path pyproject.toml $(SRC_FOLDERS)
+	poetry run black --config pyproject.toml $(SRC_FOLDERS)
 
 #* Linting
 .PHONY: test
@@ -41,18 +42,18 @@ test:
 
 .PHONY: check-codestyle
 check-codestyle:
-	poetry run isort --diff --check-only --settings-path pyproject.toml ./dynnode2vec ./tests
-	poetry run black --diff --check --config pyproject.toml ./dynnode2vec ./tests
-	poetry run darglint --verbosity 2 ./dynnode2vec ./tests
-	poetry run pylint ./dynnode2vec/ ./tests
+	poetry run isort --diff --check-only --settings-path pyproject.toml $(SRC_FOLDERS)
+	poetry run black --diff --check --config pyproject.toml $(SRC_FOLDERS)
+	poetry run darglint --verbosity 2 $(SRC_FOLDERS)
+	poetry run pylint $(SRC_FOLDERS)
 
 .PHONY: pylint
 pylint:
-	poetry run pylint ./dynnode2vec/ ./tests
+	poetry run pylint $(SRC_FOLDERS)
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --config-file pyproject.toml ./dynnode2vec ./tests
+	poetry run mypy --config-file pyproject.toml $(SRC_FOLDERS)
 
 .PHONY: lint
 lint: check-codestyle mypy
