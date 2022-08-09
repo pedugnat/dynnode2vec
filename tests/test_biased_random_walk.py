@@ -17,7 +17,7 @@ def fixture_graphs():
     )
 
 
-def add_weights(graph):
+def add_random_weights(graph):
     for *_, data in graph.edges(data=True):
         data["weight"] = random.random()
 
