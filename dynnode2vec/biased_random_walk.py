@@ -145,7 +145,7 @@ class BiasedRandomWalk:
 
     def run(
         self,
-        nodes: List[int],
+        nodes: List[Any],
         *,
         n_walks: int = 10,
         walk_length: int = 10,
@@ -159,6 +159,8 @@ class BiasedRandomWalk:
         behavior of the random walk is mainly conditioned by two parameters p and q.
         """
         rn = random.Random(seed)
+
+        nodes = self.convert_true_ids_to_int_ids(nodes)
 
         # weights are multiplied by inverse p and q
         ip, iq = 1.0 / p, 1.0 / q

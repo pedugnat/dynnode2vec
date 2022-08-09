@@ -82,4 +82,4 @@ def test_run(graphs, p, q, weighted):
     random_walks = brw.run(graph.nodes(), p=p, q=q, weighted=weighted)
 
     assert all(isinstance(walk, list) for walk in random_walks)
-    assert all(n in brw.graph.nodes() for walk in random_walks for n in walk)
+    assert all(n in graph.nodes() for walk in random_walks for n in walk)
