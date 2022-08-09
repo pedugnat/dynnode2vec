@@ -160,6 +160,8 @@ class BiasedRandomWalk:
         """
         rn = random.Random(seed)
 
+        nodes = self.convert_true_ids_to_int_ids(nodes)
+
         # weights are multiplied by inverse p and q
         ip, iq = 1.0 / p, 1.0 / q
 

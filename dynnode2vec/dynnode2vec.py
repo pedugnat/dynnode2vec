@@ -163,11 +163,8 @@ class DynNode2Vec:
             # that changed compared to the previous time step
             delta_nodes = self.get_delta_nodes(current_graph, previous_graph)
 
-        brw = BiasedRandomWalk(current_graph)
-        delta_nodes = brw.convert_true_ids_to_int_ids(delta_nodes)
-
         # run walks for updated nodes only
-        updated_walks = brw.run(
+        updated_walks = BiasedRandomWalk(current_graph).run(
             nodes=delta_nodes,
             walk_length=self.walk_length,
             n_walks=self.n_walks_per_node,
