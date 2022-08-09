@@ -2,8 +2,6 @@
 Define a DynNode2Vec class to run dynnode2vec algorithm over dynamic graphs.
 """
 # pylint: disable=invalid-name
-from __future__ import annotations
-
 from typing import Any, Iterable
 
 from collections import namedtuple

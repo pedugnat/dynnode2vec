@@ -2,9 +2,7 @@
 Define a BiasedRandomWalk class to perform biased random walks over graphs.
 """
 # pylint: disable=invalid-name
-from __future__ import annotations
-
-from typing import Any, List, Iterable
+from typing import Any, Iterable
 
 import bisect
 import random
@@ -13,7 +11,7 @@ from functools import partial
 import networkx as nx
 import numpy as np
 
-RandomWalks = List[List[Any]]
+RandomWalks = list[list[Any]]
 
 
 class BiasedRandomWalk:
