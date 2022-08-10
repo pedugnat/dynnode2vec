@@ -3,10 +3,12 @@ Build training and test sets from dynamic graphs.
 """
 import networkx as nx
 
-from dynnode2vec.dynnode2vec import Embedding, DynNode2Vec
+from dynnode2vec.dynnode2vec import DynNode2Vec, Embedding
 
 
-def get_node2vec_embeddings(graphs: list[nx.Graph], parameters: dict) -> list[Embedding]:
+def get_node2vec_embeddings(
+    graphs: list[nx.Graph], parameters: dict
+) -> list[Embedding]:
     """
     Build plain node2vec embeddings at each time step.
     """
