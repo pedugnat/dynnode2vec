@@ -38,9 +38,9 @@ def plain_node2vec_parallel_fixture():
     )
 
 
-def test_initialize_embeddings(graphs, dynnode2vec_object):
+def test_get_node2vec_embeddings(graphs, dynnode2vec_object):
     # pylint: disable=protected-access
-    init_model, init_embeddings = dynnode2vec_object._initialize_embeddings(graphs)
+    init_model, init_embeddings = dynnode2vec_object.get_node2vec_embeddings(graphs[0])
 
     assert isinstance(init_model, gensim.models.Word2Vec)
     assert isinstance(init_embeddings[0], dynnode2vec.Embedding)
