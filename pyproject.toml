@@ -32,7 +32,7 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.8,<3.11"
 numpy = "^1.23.1"
 networkx = "^2.8.5"
 gensim = "^4.2.0"
