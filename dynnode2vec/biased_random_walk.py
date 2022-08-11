@@ -7,6 +7,7 @@ from typing import Any, Dict, Iterable, List, Union
 import bisect
 import random
 from functools import partial
+from multiprocessing import Pool
 
 import networkx as nx
 import numpy as np
@@ -153,6 +154,7 @@ class BiasedRandomWalk:
         q: float = 1.0,
         weighted: bool = False,
         seed: Union[int, None] = None,
+        n_processes=1,
     ) -> RandomWalks:
         """
         Perform a number of random walks for all the nodes of the graph. The
@@ -180,12 +182,20 @@ class BiasedRandomWalk:
         )
 
         walks = []
+        connected_nodes = []
+
         for node in nodes:
             if self.graph.degree[node] == 0:
                 # the node has no neighbors, so the walk ends instantly
-                walks.extend([[node] for _ in range(n_walks)])
+                walks.append([node])
             else:
-                walks.extend([generate_walk(node) for _ in range(n_walks)])
+                connected_nodes.append(node)
+
+        if n_processes > 1:
+            with Pool(n_processes) as p:
+                walks.extend(p.map(generate_walk, connected_nodes * n_walks))
+        else:
+            walks.extend([generate_walk(node) for node in connected_nodes * n_walks])
 
         # map back the integer ids (used for speed) to the original node ids
         self.map_int_ids_to_true_ids(walks)
