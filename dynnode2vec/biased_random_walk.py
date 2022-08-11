@@ -154,12 +154,13 @@ class BiasedRandomWalk:
         q: float = 1.0,
         weighted: bool = False,
         seed: Union[int, None] = None,
-        n_processes=1,
+        n_processes: int = 1,
     ) -> RandomWalks:
         """
         Perform a number of random walks for all the nodes of the graph. The
         behavior of the random walk is mainly conditioned by two parameters p and q.
         """
+        # pylint: disable=too-many-locals
         rn = random.Random(seed)
 
         nodes = self.convert_true_ids_to_int_ids(nodes)
@@ -192,8 +193,8 @@ class BiasedRandomWalk:
                 connected_nodes.append(node)
 
         if n_processes > 1:
-            with Pool(n_processes) as p:
-                walks.extend(p.map(generate_walk, connected_nodes * n_walks))
+            with Pool(n_processes) as pool:
+                walks.extend(pool.map(generate_walk, connected_nodes * n_walks))
         else:
             walks.extend([generate_walk(node) for node in connected_nodes * n_walks])
 
