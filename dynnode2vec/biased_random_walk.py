@@ -2,7 +2,7 @@
 Define a BiasedRandomWalk class to perform biased random walks over graphs.
 """
 # pylint: disable=invalid-name
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable, List, Union
 
 import bisect
 import random
@@ -11,7 +11,7 @@ from functools import partial
 import networkx as nx
 import numpy as np
 
-RandomWalks = list[list[Any]]
+RandomWalks = List[List[Any]]
 
 
 class BiasedRandomWalk:
@@ -29,8 +29,8 @@ class BiasedRandomWalk:
             graph, ordering="default", label_attribute="true_label"
         )
 
-        self.mapping: dict[int, Any] = nx.get_node_attributes(self.graph, "true_label")
-        self.reverse_mapping: dict[Any, int] = {
+        self.mapping: Dict[int, Any] = nx.get_node_attributes(self.graph, "true_label")
+        self.reverse_mapping: Dict[Any, int] = {
             true_label: int_id for int_id, true_label in self.mapping.items()
         }
 
@@ -41,7 +41,7 @@ class BiasedRandomWalk:
         for i, walk in enumerate(walks):
             walks[i] = [self.mapping[int_id] for int_id in walk]
 
-    def convert_true_ids_to_int_ids(self, nodes: Iterable[Any]) -> list[int]:
+    def convert_true_ids_to_int_ids(self, nodes: Iterable[Any]) -> List[int]:
         """
         Convert list of node labels to list of int ids.
         """
@@ -72,7 +72,7 @@ class BiasedRandomWalk:
         iq: float,
         weighted: bool,
         rn: random.Random,
-    ) -> list[int]:
+    ) -> List[int]:
         # pylint: disable=too-many-arguments, too-many-locals
         """
         Generate a number of random walks starting from a given node.
@@ -123,7 +123,7 @@ class BiasedRandomWalk:
         iq: float,
         weighted: bool,
         rn: random.Random,
-    ) -> list[int]:
+    ) -> List[int]:
         # pylint: disable=too-many-arguments
         """
         Fast implementation for the scenario where:
@@ -145,14 +145,14 @@ class BiasedRandomWalk:
 
     def run(
         self,
-        nodes: list[Any],
+        nodes: List[Any],
         *,
         n_walks: int = 10,
         walk_length: int = 10,
         p: float = 1.0,
         q: float = 1.0,
         weighted: bool = False,
-        seed: int | None = None,
+        seed: Union[int, None] = None,
     ) -> RandomWalks:
         """
         Perform a number of random walks for all the nodes of the graph. The

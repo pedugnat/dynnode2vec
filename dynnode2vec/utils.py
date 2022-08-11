@@ -1,12 +1,14 @@
 """
 Utility file to define miscellaneous functions.
 """
+from typing import List
+
 import random
 
 import networkx as nx
 
 
-def sample_nodes(graph: nx.Graph, k: int) -> list[int]:
+def sample_nodes(graph: nx.Graph, k: int) -> List[int]:
     """
     Samples nodes randomly from a graph.
     """
@@ -15,7 +17,7 @@ def sample_nodes(graph: nx.Graph, k: int) -> list[int]:
 
 def create_dynamic_graph(
     n_base_nodes: int = 100, n_steps: int = 10, base_density: float = 0.01
-) -> list[nx.Graph]:
+) -> List[nx.Graph]:
     """
     Creates a list of graphs representing the evolution of a dynamic graph,
     i.e. graphs that each depend on the previous graph.

@@ -2,7 +2,7 @@
 Define a DynNode2Vec class to run dynnode2vec algorithm over dynamic graphs.
 """
 # pylint: disable=invalid-name
-from typing import Any, Iterable
+from typing import Any, Iterable, List, Optional, Set, Tuple
 
 from collections import namedtuple
 from itertools import chain, starmap
@@ -37,7 +37,7 @@ class DynNode2Vec:
         n_walks_per_node: int = 10,
         embedding_size: int = 128,
         window: int = 10,
-        seed: int | None = 0,
+        seed: Optional[int] = 0,
         parallel_processes: int = 4,
         plain_node2vec: bool = False,
     ):
@@ -69,7 +69,7 @@ class DynNode2Vec:
             isinstance(window, int) and embedding_size > 0
         ), "window should be a strictly positive integer"
         assert (
-            isinstance(seed, int | None)
+            seed is None or isinstance(seed, int)
         ) and embedding_size > 0, "seed should be either None or int"
         assert (
             isinstance(parallel_processes, int) and 0 < parallel_processes < 128
@@ -90,8 +90,8 @@ class DynNode2Vec:
         self.gensim_workers = max(self.parallel_processes - 1, 12)
 
     def _initialize_embeddings(
-        self, graphs: list[nx.Graph]
-    ) -> tuple[Word2Vec, list[Embedding]]:
+        self, graphs: List[nx.Graph]
+    ) -> Tuple[Word2Vec, List[Embedding]]:
         """
         Compute normal node2vec embedding at timestep 0.
         """
@@ -120,7 +120,7 @@ class DynNode2Vec:
         return model, [embedding]
 
     @staticmethod
-    def get_delta_nodes(current_graph: nx.Graph, previous_graph: nx.Graph) -> set[Any]:
+    def get_delta_nodes(current_graph: nx.Graph, previous_graph: nx.Graph) -> Set[Any]:
         """
         Find nodes in the current graph which have been modified, i.e. they have been added,
         or at least one of their edge have been updated.
@@ -144,7 +144,7 @@ class DynNode2Vec:
         # Delta nodes are new nodes (V_add) and current nodes which edges have changed.
         # Since we only care about nodes that have at least one edge, we can
         # assume that V_add ⊆ {v_i ∈ V_t | ∃e_i = (v_i, v_j) ∈ (E_add ∪ E_del)}
-        delta_nodes: set[Any] = current_graph.nodes & nodes_with_modified_edges
+        delta_nodes: Set[Any] = current_graph.nodes & nodes_with_modified_edges
 
         return delta_nodes
 
@@ -174,7 +174,7 @@ class DynNode2Vec:
 
         return updated_walks
 
-    def _simulate_walks(self, graphs: list[nx.Graph]) -> Iterable[RandomWalks]:
+    def _simulate_walks(self, graphs: List[nx.Graph]) -> Iterable[RandomWalks]:
         """
         Parallelize the generation of walks on the time steps graphs.
         """
@@ -186,7 +186,7 @@ class DynNode2Vec:
 
     def _update_embeddings(
         self,
-        embeddings: list[Embedding],
+        embeddings: List[Embedding],
         time_walks: Iterable[RandomWalks],
         model: Word2Vec,
     ) -> None:
@@ -226,7 +226,7 @@ class DynNode2Vec:
 
             embeddings.append(embedding)
 
-    def compute_embeddings(self, graphs: list[nx.Graph]) -> list[Embedding]:
+    def compute_embeddings(self, graphs: List[nx.Graph]) -> List[Embedding]:
         """
         Compute dynamic embeddings on a list of graphs.
         """
