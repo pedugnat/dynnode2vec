@@ -1,6 +1,8 @@
 """
 Build graphs from datasets.
 """
+from __future__ import annotations
+
 import gzip
 
 import networkx as nx

@@ -1,6 +1,8 @@
 """
 Build training and test sets from dynamic graphs.
 """
+from __future__ import annotations
+
 import networkx as nx
 
 from dynnode2vec.dynnode2vec import DynNode2Vec, Embedding
