@@ -94,7 +94,7 @@ class DynNode2Vec:
         # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp  # pylint: disable=line-too-long
         self.gensim_workers = max(self.parallel_processes - 1, 12)
 
-    def check_edge_weights(self, graphs: list[nx.Graph]) -> None:
+    def _check_edge_weights(self, graphs: list[nx.Graph]) -> None:
         """
         Check that all edge weights are strictly positive, otherwise we can not run random walks.
         """
@@ -250,7 +250,7 @@ class DynNode2Vec:
         """
         Compute dynamic embeddings on a list of graphs.
         """
-        # TO DO : check graph weights valid
+        self._check_edge_weights(graphs)
         model, embeddings = self._initialize_embeddings(graphs)
         time_walks = self._simulate_walks(graphs)
         self._update_embeddings(embeddings, time_walks, model)
