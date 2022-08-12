@@ -91,16 +91,14 @@ class DynNode2Vec:
         # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp  # pylint: disable=line-too-long
         self.gensim_workers = max(self.parallel_processes - 1, 12)
 
-    def _initialize_embeddings(
-        self, graphs: list[nx.Graph]
+    def get_node2vec_embeddings(
+        self, graph: nx.Graph
     ) -> tuple[Word2Vec, list[Embedding]]:
         """
-        Compute normal node2vec embedding at timestep 0.
+        Compute normal node2vec embedding.
         """
-        first_graph = graphs[0]
-
-        first_walks = BiasedRandomWalk(first_graph).run(
-            nodes=first_graph.nodes(),
+        walks = BiasedRandomWalk(graph).run(
+            nodes=graph.nodes,
             walk_length=self.walk_length,
             n_walks=self.n_walks_per_node,
             p=self.p,
@@ -108,7 +106,7 @@ class DynNode2Vec:
         )
 
         model = Word2Vec(
-            sentences=first_walks,
+            sentences=walks,
             vector_size=self.embedding_size,
             window=self.window,
             min_count=0,
@@ -159,7 +157,7 @@ class DynNode2Vec:
         if self.plain_node2vec:
             # if we stick to node2vec implementation, we sample walks
             # for all nodes at each time step
-            delta_nodes = current_graph.nodes()
+            delta_nodes = current_graph.nodes
         else:
             # if we use dynnode2vec, we sample walks only for nodes
             # that changed compared to the previous time step
@@ -233,8 +231,13 @@ class DynNode2Vec:
         Compute dynamic embeddings on a list of graphs.
         """
         # TO DO : check graph weights valid
-        model, embeddings = self._initialize_embeddings(graphs)
+        # Compute normal node2vec embedding at timestep 0.
+        model, embeddings = self.get_node2vec_embeddings(graphs[0])
+
+        # Simulate walks for all time steps.
         time_walks = self._simulate_walks(graphs)
+
+        # Compute embeddings for all time steps.
         self._update_embeddings(embeddings, time_walks, model)
 
         return embeddings

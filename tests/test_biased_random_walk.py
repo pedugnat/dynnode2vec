@@ -26,7 +26,7 @@ def test_init(graphs):
     brw = dynnode2vec.biased_random_walk.BiasedRandomWalk(graphs[0])
 
     # make sure nodes ids were converted to integers
-    assert list(brw.graph.nodes()) == list(range(brw.graph.number_of_nodes()))
+    assert list(brw.graph.nodes) == list(range(brw.graph.number_of_nodes()))
 
 
 def test_weighted_choice(graphs):
@@ -66,7 +66,7 @@ def test_generate_walk(graphs, ip, iq, weighted):
     )
 
     assert isinstance(walk, list)
-    assert all(n in brw.graph.nodes() for n in walk)
+    assert all(n in brw.graph.nodes for n in walk)
 
 
 @pytest.mark.parametrize("p", [0.5, 1.0])
@@ -84,7 +84,7 @@ def test_run(graphs, p, q, weighted, n_processes):
     brw = dynnode2vec.biased_random_walk.BiasedRandomWalk(graph)
 
     random_walks = brw.run(
-        graph.nodes(), p=p, q=q, weighted=weighted, n_processes=n_processes
+        graph.nodes, p=p, q=q, weighted=weighted, n_processes=n_processes
     )
     assert all(isinstance(walk, list) for walk in random_walks)
-    assert all(n in graph.nodes() for walk in random_walks for n in walk)
+    assert all(n in graph.nodes for walk in random_walks for n in walk)

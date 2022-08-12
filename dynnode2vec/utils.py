@@ -26,7 +26,7 @@ def create_dynamic_graph(
     graph = nx.fast_gnp_random_graph(n=n_base_nodes, p=base_density)
 
     # add one to each node to avoid the perfect case where true_ids match int_ids
-    graph = nx.relabel_nodes(graph, mapping={n: str(n) for n in graph.nodes()})
+    graph = nx.relabel_nodes(graph, mapping={n: str(n) for n in graph.nodes})
 
     # initialize graphs list with first graph
     graphs = [graph.copy()]
