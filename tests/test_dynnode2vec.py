@@ -108,9 +108,10 @@ def test_compute_weighted_embeddings(graphs, weighted_dynnode2vec_object):
     assert all(isinstance(emb, dynnode2vec.Embedding) for emb in embeddings)
 
     # add random negative weights to the graph and check that it raises
+    rng = random.Random(0)
     for graph in graphs:
         for _, _, data in graph.edges(data=True):
-            data["weight"] = -random.random()
+            data["weight"] = -rng.random()
 
     with pytest.raises(AssertionError):
         weighted_dynnode2vec_object.compute_embeddings(graphs)
