@@ -2,6 +2,7 @@
 Test the DynNode2Vec class
 """
 # pylint: disable=missing-function-docstring
+import random
 
 import gensim
 import networkx as nx
@@ -21,6 +22,13 @@ def fixture_graphs():
 def dynnode2vec_fixture():
     return dynnode2vec.DynNode2Vec(
         n_walks_per_node=5, walk_length=5, parallel_processes=1
+    )
+
+
+@pytest.fixture(name="weighted_dynnode2vec_object")
+def weighted_dynnode2vec_fixture():
+    return dynnode2vec.DynNode2Vec(
+        n_walks_per_node=5, walk_length=5, weighted=True, parallel_processes=1
     )
 
 
@@ -91,6 +99,21 @@ def test_compute_embeddings(graphs, dynnode2vec_object):
 
     assert isinstance(embeddings, list)
     assert all(isinstance(emb, dynnode2vec.Embedding) for emb in embeddings)
+
+
+def test_compute_weighted_embeddings(graphs, weighted_dynnode2vec_object):
+    embeddings = weighted_dynnode2vec_object.compute_embeddings(graphs)
+
+    assert isinstance(embeddings, list)
+    assert all(isinstance(emb, dynnode2vec.Embedding) for emb in embeddings)
+
+    # add random negative weights to the graph and check that it raises
+    for graph in graphs:
+        for _, _, data in graph.edges(data=True):
+            data["weight"] = -random.random()
+
+    with pytest.raises(AssertionError):
+        weighted_dynnode2vec_object.compute_embeddings(graphs)
 
 
 def test_parallel_compute_embeddings(graphs, parallel_dynnode2vec_object):
