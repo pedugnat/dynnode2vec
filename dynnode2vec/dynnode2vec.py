@@ -39,6 +39,7 @@ class DynNode2Vec:
         n_walks_per_node: int = 10,
         embedding_size: int = 128,
         window: int = 10,
+        weighted: bool = False,
         seed: int | None = 0,
         parallel_processes: int = 4,
         plain_node2vec: bool = False,
@@ -70,6 +71,7 @@ class DynNode2Vec:
         assert (
             isinstance(window, int) and embedding_size > 0
         ), "window should be a strictly positive integer"
+        assert isinstance(weighted, bool), "weighted should be a boolean"
         assert (
             seed is None or isinstance(seed, int)
         ) and embedding_size > 0, "seed should be either None or int"
@@ -84,12 +86,28 @@ class DynNode2Vec:
         self.n_walks_per_node = n_walks_per_node
         self.embedding_size = embedding_size
         self.window = window
+        self.weighted = weighted
         self.seed = seed
         self.parallel_processes = parallel_processes
         self.plain_node2vec = plain_node2vec
 
         # see https://stackoverflow.com/questions/53417258/what-is-workers-parameter-in-word2vec-in-nlp  # pylint: disable=line-too-long
         self.gensim_workers = max(self.parallel_processes - 1, 12)
+
+    def _check_edge_weights(self, graphs: list[nx.Graph]) -> None:
+        """
+        Check that all edge weights are strictly positive, otherwise we can not run random walks.
+        """
+        if not self.weighted:
+            return
+
+        for i, graph in enumerate(graphs):
+            weights = nx.get_edge_attributes(graph, name="weight")
+
+            assert all(weight > 0 for weight in weights.values()), (
+                "All edge weights should be strictly positive to run Dynnode2Vec "
+                f"found negative weight in graph {i}"
+            )
 
     def _initialize_embeddings(
         self, graphs: list[nx.Graph]
@@ -232,7 +250,7 @@ class DynNode2Vec:
         """
         Compute dynamic embeddings on a list of graphs.
         """
-        # TO DO : check graph weights valid
+        self._check_edge_weights(graphs)
         model, embeddings = self._initialize_embeddings(graphs)
         time_walks = self._simulate_walks(graphs)
         self._update_embeddings(embeddings, time_walks, model)
