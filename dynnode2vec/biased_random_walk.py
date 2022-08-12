@@ -2,16 +2,19 @@
 Define a BiasedRandomWalk class to perform biased random walks over graphs.
 """
 # pylint: disable=invalid-name
-from typing import Any, Iterable
+from __future__ import annotations
+
+from typing import Any, Iterable, List
 
 import bisect
 import random
 from functools import partial
+from multiprocessing import Pool
 
 import networkx as nx
 import numpy as np
 
-RandomWalks = list[list[Any]]
+RandomWalks = List[List[Any]]
 
 
 class BiasedRandomWalk:
@@ -153,11 +156,13 @@ class BiasedRandomWalk:
         q: float = 1.0,
         weighted: bool = False,
         seed: int | None = None,
+        n_processes: int = 1,
     ) -> RandomWalks:
         """
         Perform a number of random walks for all the nodes of the graph. The
         behavior of the random walk is mainly conditioned by two parameters p and q.
         """
+        # pylint: disable=too-many-locals
         rn = random.Random(seed)
 
         nodes = self.convert_true_ids_to_int_ids(nodes)
@@ -180,12 +185,20 @@ class BiasedRandomWalk:
         )
 
         walks = []
+        connected_nodes = []
+
         for node in nodes:
             if self.graph.degree[node] == 0:
                 # the node has no neighbors, so the walk ends instantly
-                walks.extend([[node] for _ in range(n_walks)])
+                walks.append([node])
             else:
-                walks.extend([generate_walk(node) for _ in range(n_walks)])
+                connected_nodes.append(node)
+
+        if n_processes > 1:
+            with Pool(n_processes) as pool:
+                walks.extend(pool.map(generate_walk, connected_nodes * n_walks))
+        else:
+            walks.extend([generate_walk(node) for node in connected_nodes * n_walks])
 
         # map back the integer ids (used for speed) to the original node ids
         self.map_int_ids_to_true_ids(walks)

@@ -2,6 +2,8 @@
 Define a DynNode2Vec class to run dynnode2vec algorithm over dynamic graphs.
 """
 # pylint: disable=invalid-name
+from __future__ import annotations
+
 from typing import Any, Iterable
 
 from collections import namedtuple
@@ -69,7 +71,7 @@ class DynNode2Vec:
             isinstance(window, int) and embedding_size > 0
         ), "window should be a strictly positive integer"
         assert (
-            isinstance(seed, int | None)
+            seed is None or isinstance(seed, int)
         ) and embedding_size > 0, "seed should be either None or int"
         assert (
             isinstance(parallel_processes, int) and 0 < parallel_processes < 128
